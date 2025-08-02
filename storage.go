@@ -135,6 +135,27 @@ func (s *StorageClient) UploadImage(ctx context.Context, path, filename string, 
 	return err
 }
 
+func (s *StorageClient) ListCSVFiles(ctx context.Context, prefix string) ([]FileInfo, error) {
+	key := s.buildPath("csv/" + prefix)
+	result, err := s.client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
+		Bucket: aws.String(s.bucketName),
+		Prefix: aws.String(key),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	files := make([]FileInfo, 0, len(result.Contents))
+	for _, obj := range result.Contents {
+		files = append(files, FileInfo{
+			Key:          *obj.Key,
+			Size:         *obj.Size,
+			LastModified: *obj.LastModified,
+		})
+	}
+	return files, nil
+}
+
 func (s *StorageClient) TestConnection(ctx context.Context) error {
 	_, err := s.client.HeadBucket(ctx, &s3.HeadBucketInput{
 		Bucket: aws.String(s.bucketName),
