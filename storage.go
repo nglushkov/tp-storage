@@ -98,6 +98,7 @@ func (s *StorageClient) buildPath(path string) string {
 
 func (s *StorageClient) UploadCSV(ctx context.Context, path, filename string, data []byte) error {
 	key := filepath.Join(path, "csv", filename)
+	key = s.buildPath(key)
 	_, err := s.client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket:      aws.String(s.bucketName),
 		Key:         aws.String(key),
@@ -109,6 +110,7 @@ func (s *StorageClient) UploadCSV(ctx context.Context, path, filename string, da
 
 func (s *StorageClient) DownloadCSV(ctx context.Context, path, filename string) ([]byte, error) {
 	key := filepath.Join(path, "csv", filename)
+	key = s.buildPath(key)
 	result, err := s.client.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(s.bucketName),
 		Key:    aws.String(key),
@@ -122,6 +124,7 @@ func (s *StorageClient) DownloadCSV(ctx context.Context, path, filename string) 
 
 func (s *StorageClient) UploadImage(ctx context.Context, path, filename string, data []byte, contentType string) error {
 	key := filepath.Join(path, "csv", filename)
+	key = s.buildPath(key)
 	_, err := s.client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket:      aws.String(s.bucketName),
 		Key:         aws.String(key),
