@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -146,4 +147,20 @@ func getEnvOrDefault(key, defaultValue string) string {
 		return value
 	}
 	return defaultValue
+}
+
+func GetStorageClient(env Environment) *StorageClient {
+	cfg := LoadR2ConfigFromEnv()
+
+	devUser := os.Getenv("R2_USERNAME")
+	if devUser == "" {
+		devUser = "default-user"
+	}
+
+	storageClient, err := NewStorageClient(cfg, env, os.Getenv("R2_USERNAME"))
+	if err != nil {
+		log.Fatalf("Failed to create storage client: %v", err)
+	}
+
+	return storageClient
 }
