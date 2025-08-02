@@ -3,7 +3,6 @@ package storage
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -89,7 +88,7 @@ func (s *StorageClient) buildPath(path string) string {
 	switch s.environment {
 	case Development:
 		if s.devUser != "" {
-			return filepath.Join(string(s.environment), "dev-"+s.devUser, path)
+			return filepath.Join(string(s.environment), s.devUser, path)
 		}
 		return filepath.Join(string(s.environment), path)
 	default:
@@ -97,8 +96,8 @@ func (s *StorageClient) buildPath(path string) string {
 	}
 }
 
-func (s *StorageClient) UploadCSV(ctx context.Context, path string, data []byte) error {
-	key := s.buildPath("csv/" + path)
+func (s *StorageClient) UploadCSV(ctx context.Context, path, filename string, data []byte) error {
+	key := filepath.Join(path, "csv", filename)
 	_, err := s.client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket:      aws.String(s.bucketName),
 		Key:         aws.String(key),
@@ -108,8 +107,8 @@ func (s *StorageClient) UploadCSV(ctx context.Context, path string, data []byte)
 	return err
 }
 
-func (s *StorageClient) DownloadCSV(ctx context.Context, path string) ([]byte, error) {
-	key := s.buildPath("csv/" + path)
+func (s *StorageClient) DownloadCSV(ctx context.Context, path, filename string) ([]byte, error) {
+	key := filepath.Join(path, "csv", filename)
 	result, err := s.client.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(s.bucketName),
 		Key:    aws.String(key),
@@ -121,34 +120,8 @@ func (s *StorageClient) DownloadCSV(ctx context.Context, path string) ([]byte, e
 	return io.ReadAll(result.Body)
 }
 
-func (s *StorageClient) ListCSVFiles(ctx context.Context, prefix string) ([]FileInfo, error) {
-	key := s.buildPath("csv/" + prefix)
-	result, err := s.client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
-		Bucket: aws.String(s.bucketName),
-		Prefix: aws.String(key),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	files := make([]FileInfo, 0, len(result.Contents))
-	for _, obj := range result.Contents {
-		files = append(files, FileInfo{
-			Key:          *obj.Key,
-			Size:         *obj.Size,
-			LastModified: *obj.LastModified,
-		})
-	}
-	return files, nil
-}
-
-func (s *StorageClient) UploadScrapedData(ctx context.Context, filename string, data []byte) error {
-	path := fmt.Sprintf("scraped/%s/%s", filename)
-	return s.UploadCSV(ctx, path, data)
-}
-
-func (s *StorageClient) UploadImage(ctx context.Context, path string, data []byte, contentType string) error {
-	key := s.buildPath("images/" + path)
+func (s *StorageClient) UploadImage(ctx context.Context, path, filename string, data []byte, contentType string) error {
+	key := filepath.Join(path, "csv", filename)
 	_, err := s.client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket:      aws.String(s.bucketName),
 		Key:         aws.String(key),
