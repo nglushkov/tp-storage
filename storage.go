@@ -135,8 +135,8 @@ func (s *StorageClient) UploadImage(ctx context.Context, path, filename string, 
 	return err
 }
 
-func (s *StorageClient) ListCSVFiles(ctx context.Context, prefix string) ([]FileInfo, error) {
-	key := s.buildPath("csv/" + prefix)
+func (s *StorageClient) ListCSVFiles(ctx context.Context, path string) ([]FileInfo, error) {
+	key := filepath.Join(path, "csv")
 	result, err := s.client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
 		Bucket: aws.String(s.bucketName),
 		Prefix: aws.String(key),
