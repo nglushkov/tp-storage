@@ -1,4 +1,4 @@
-module github.com/your-username/argentina-tech-storage
+module github.com/nglushkov/tp-storage
 
 go 1.24
 
