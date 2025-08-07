@@ -157,6 +157,16 @@ func (s *StorageClient) ListCSVFiles(ctx context.Context, path string) ([]FileIn
 	return files, nil
 }
 
+func (s *StorageClient) RemoveFile(ctx context.Context, path, filename string) error {
+	key := filepath.Join(path, "csv", filename)
+	key = s.buildPath(key)
+	_, err := s.client.DeleteObject(ctx, &s3.DeleteObjectInput{
+		Bucket: aws.String(s.bucketName),
+		Key:    aws.String(key),
+	})
+	return err
+}
+
 func (s *StorageClient) TestConnection(ctx context.Context) error {
 	_, err := s.client.HeadBucket(ctx, &s3.HeadBucketInput{
 		Bucket: aws.String(s.bucketName),
